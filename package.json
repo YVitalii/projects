@@ -3,14 +3,25 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "SET PORT=3033 && supervisor --no-restart-on exit --ignore ./test --program ./bin/www",
+    "test": "SET DEBUG=1 && mocha --recursive --colors -w --watch-list ['./*'] --node"
   },
   "dependencies": {
+    "colors": "^1.4.0",
     "cookie-parser": "~1.4.3",
+    "csv-parser": "^3.0.0",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "http-errors": "~1.6.2",
-    "jade": "~1.11.0",
-    "morgan": "~1.9.0"
+    "mongoose": "^6.2.9",
+    "morgan": "~1.9.0",
+    "pug": "^3.0.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^9.2.2",
+    "nodemon": "^2.0.15",
+    "supertest": "^6.2.2"
   }
 }
