@@ -27,6 +27,22 @@ async function addFolder(req, res) {
   trace ? console.dir(req.query) : null;
   let data = req.query;
   //data.isFolder = data.isFolder ? true : false;
+  // ---- перевірка title -------------
+  if (!data.title) {
+    res.status(400).send(
+      htmlError(
+        {
+          en: "Title is required field!",
+          ru: "Нет наименования папки",
+          ua: "Не вказана назва папки",
+        },
+        data
+      )
+    );
+    return;
+  }
+
+  // ---     перевірка батька   ----------------
   data["isFolder"] = Boolean(data.isFolder);
   data.parent = data.parent ? data.parent.trim() : "";
   if ((data.parent === "null") | (data.parent === "") | (data.parent === "0")) {

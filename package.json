@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "SET PORT=3033 && supervisor --no-restart-on exit --ignore ./test --program ./bin/www",
+    "start": "SET PORT=3033 && SET DEBUG=1 && supervisor --no-restart-on exit --ignore ./test --program ./bin/www",
     "test": "SET DEBUG=1 && mocha --recursive --colors -w --watch-list ['./*'] --node"
   },
   "dependencies": {

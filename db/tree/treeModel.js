@@ -34,12 +34,12 @@ const Tree = new Schema({
     default: "",
   },
   children: {
-    // коеф. перерахунку техн.од → бухг.од., наприклад для "кутн 63х63" це 1 м = 2,5 кг
+    // список дітей
     type: [Schema.Types.ObjectId],
     default: [],
   },
   isFolder: {
-    // вага технічної одиниці в "кг", наприклад для "кутн 63х63" → 2,5 кг/м
+    // мітка папки
     type: Boolean,
     default: false,
   },
