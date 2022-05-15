@@ -1,99 +1,171 @@
 /*
 set PORT=3033 
-set DEVELOPMENT=1  
-nodemon --exec "mocha -c" -w "./" -w "./test"
+set DEVELOPMENT=1 
+nodemon --exec "mocha -c" -w "./" -w "./db/tree/*" 
 supervisor --no-restart-on exit -i ./db/tree/test --program ./bin/www
 
 */
-//Подключаем dev-dependencies
-const request = require("supertest");
-let assert = require("chai").assert;
+
+const mongoose = require("mongoose");
+const connectionString = require("../../../configs/db_config").connectionString;
+
 let chaiHttp = require("chai-http");
-// console.log("process.env.port=" + process.env.port);
-// //console.dir();
-let port = process.env.PORT ? process.env.PORT : 3000;
+let chai = require("chai");
+let expect = chai.expect;
+chai.use(chaiHttp);
+console.log("process.env.port=" + process.env.port);
+console.log("process.env.development=" + process.env.development);
+
+let port = Number(process.env.PORT ? process.env.PORT : 3000);
 let app = "http://localhost:" + port + "/tree/";
-console.log("app=" + app);
-// //const maxItemsQty = require("../../configs/db_config.js").maxGetItemsPerTime;
+
+console.log("server=" + app);
+
 // // ------------ логгер  --------------------
 const log = require("../../../tools/log.js"); // логер
 let logName = "<" + __filename.replace(__dirname, "").slice(1) + ">:";
-// let gTrace = 0; //=1 глобальная трассировка (трассируется все)
-
-// // ? const res = require("express/lib/response");
 
 console.log(" ---------> Test started:  " + new Date().toLocaleString());
 
-describe("/addFolder", () => {
+before((done) => {
+  setTimeout(async function () {
+    let trace = 1;
+    log("w", "Before started:" + new Date().toLocaleString());
+    // створюємо підключення до бази
+    let connection = await mongoose
+      .createConnection(connectionString)
+      .asPromise();
+    trace
+      ? log(
+          "i",
+          " DB: Connection to base: '" + connection.name + "' established"
+        )
+      : null;
+    // видаляємо колекцію
+    await connection.dropCollection("trees");
+    trace ? log("i", "DB: Collection 'trees' was dropped!") : null;
+    // закриваємо підключення до бази
+    await connection.close();
+    trace ? log("i", "DB: Connection to base was closed") : null;
+    done();
+  }, 1000);
+}); // очікуємо перезапуску сервера
+
+describe("/folder/", () => {
+  //this.timeout(3000);
   let folder = {
     title: "СНО-4.8.3/11",
     description: "Піч на склад",
   };
-  // ----------------  "POST:/ addFolder" --------------
+
+  // ----------------  "POST:/folder/add " --------------
   //console.dir(arguments);
-  describe("POST:/addFolder", () => {
-    let path = "/addFolder";
-    let id = "";
+  describe("POST:/folder/add", () => {
+    log("w", "Tests started:" + new Date().toLocaleString());
+    let path = "/folder/add";
+    let id = "undefined";
+    let childrenId;
     // -------------- пустий запит -----------
     it("Пустий запит на створення папки", (done) => {
-      request(app)
+      chai
+        .request(app)
         .post(path)
-        .expect(400)
-        .end((err, res) => {
-          if (err) {
-            done(err);
-            return;
-          }
-          //console.dir(res.text);
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.err).to.be.a("object");
           done();
         });
     });
     //--------------- Створення проекту СНО-4.8.3/11  -----------------------
-    it("Створення проекту СНО-4.8.3/11", (done) => {
-      request(app)
+    it("Створення проекту 'СНО-4.8.3/11'", (done) => {
+      chai
+        .request(app)
         .post(path)
-        //.send(folder)
         .query(folder)
-        .expect(200)
-        .end((err, res) => {
-          id = JSON.parse(res.text).data._id;
+        .end(function (err, res) {
+          id = res.body.data._id;
+          //console.log("---res.body.data._id----");
           //console.dir(id);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
           done();
         });
     });
     //--------------- Створення проекту з однаковою назвою СНО-4.8.3/11  -----------------------
-    it("Створення проекту з однаковою назвою СНО-4.8.3/11", (done) => {
-      request(app)
+    it("Створення проекту з однаковою назвою 'СНО-4.8.3/11'", (done) => {
+      chai
+        .request(app)
         .post(path)
         .query(folder)
-        .expect(400)
-        .end((err, res) => {
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.err).to.be.a("object");
           done();
         });
     });
+
     //--------------- Створення проекту з існуючим батьком  -----------------------
-    it("Створення папки з існуючим батьком", (done) => {
+    it(`Створення папки з існуючим батьком _id="${id}"`, (done) => {
       folder["parent"] = id;
       folder.title = "Корпус";
       folder.description = "Корпус печі";
-      request(app)
+      chai
+        .request(app)
         .post(path)
         .query(folder)
-        .expect(200)
-        .end((err, res) => {
-          let id = JSON.parse(res.text).data._id;
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data._id).to.be.a("string");
+          childrenId = res.body.data._id;
           done();
         });
     });
-    //--------------- Створення проекту з неіснуючим батьком  -----------------------
-    it("Створення папки з неіснуючим батьком", (done) => {
+
+    //--------------- Створення проекту з існуючим батьком  -----------------------
+    it("Створення папки з існуючим батьком _id=" + id, (done) => {
       folder["parent"] = id;
-      folder.parent = folder.parent.slice(0, -1) + "a";
-      request(app)
+      folder.title = "Двері";
+      folder.description = "Двері печі";
+      chai
+        .request(app)
         .post(path)
         .query(folder)
-        .expect(400)
-        .end((err, res) => {
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data._id).to.be.a("string");
+          done();
+        });
+    });
+
+    //--------------- Створення проекту з неіснуючим батьком  -----------------------
+    it("Створення папки з неіснуючим батьком", (done) => {
+      //folder["parent"] = "6266d5f3bad48bbf6ebe66c7";
+      folder.parent = id.slice(0, -3) + "bad";
+      //console.log("folder.parent=", folder.parent);
+      chai
+        .request(app)
+        .post(path)
+        .query(folder)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.err).to.be.a("object");
+          done();
+        });
+    });
+    //--------------- Створення дитини у дитини: Корпус.Каркас  -----------------------
+    it("Створення дитини дитини", (done) => {
+      //folder["parent"] = "6266d5f3bad48bbf6ebe66c7";
+      folder.parent = childrenId;
+      folder.title = "Каркас";
+      folder.description = "Несуча рама";
+      //console.log("folder.parent=childrenId=", folder.parent);
+      chai
+        .request(app)
+        .post(path)
+        .query(folder)
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data._id).to.be.a("string");
           done();
         });
     });
@@ -150,4 +222,5 @@ describe("/addFolder", () => {
   // }); //describe("GET:/getById"
 }); //describe("/addFolder"
 
+describe("/folder/delete", () => {});
 // //console.log(" ---------> Test started");

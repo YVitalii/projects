@@ -38,6 +38,11 @@ const Tree = new Schema({
     type: [Schema.Types.ObjectId],
     default: [],
   },
+  code: {
+    // список дітей
+    type: Number,
+    default: null,
+  },
   isFolder: {
     // мітка папки
     type: Boolean,

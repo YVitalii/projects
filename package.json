@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "SET PORT=3033 && SET DEBUG=1 && supervisor --no-restart-on exit --ignore ./test --program ./bin/www",
-    "test": "SET DEBUG=1 && mocha --recursive --colors -w --watch-list ['./*'] --node"
+    "start": "set PORT=3033 && set DEVELOPMENT=1 && supervisor --no-restart-on exit --ignore ./test --program ./bin/www",
+    "test": "set PORT=3032 && set DEVELOPMENT=1 && mocha ./db/tree/test.js -c -w -watch-files './db/tree/**' ",
+    "testServer":"set PORT=3032 && set DEVELOPMENT=1 && supervisor --no-restart-on exit --ignore ./db/tree/test/ --program ./bin/www"
   },
   "dependencies": {
     "colors": "^1.4.0",
