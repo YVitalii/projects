@@ -91,15 +91,18 @@ async function addFolder(req, res) {
     : null;
   trace ? console.dir(one) : null;
   if (one.length > 0) {
+    let text = " req.querry.title=" + JSON.stringify(data.title);
     let response = htmlError(
       {
-        en: "For each parent the Title of project must be unique!",
-        ru: "Для каждого родителя наименование проекта должно быть уникальным",
-        ua: "Для кожного батька назва проекту повинна бути унікальною",
+        en: "For each parent the Title of project must be unique!" + text,
+        ru:
+          "Для каждого родителя наименование проекта должно быть уникальным" +
+          text,
+        ua: "Для кожного батька назва проекту повинна бути унікальною" + text,
       },
       data
     );
-    log("e", response.err.ua);
+
     res.status(400).json(response);
     return;
   }

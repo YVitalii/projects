@@ -1,16 +1,16 @@
 // // ------------ логгер  --------------------
-const log = require("../../tools/log.js"); // логер
+const log = require("../../../tools/log.js"); // логер
 let logName = "<" + __filename.replace(__dirname, "").slice(1) + ">:";
 log("w", logName, " ---------> Test started:  " + new Date().toLocaleString());
 
-console.log("process.env.port=" + process.env.port);
-console.log("process.env.development=" + process.env.development);
-let port = Number(process.env.PORT ? process.env.PORT : 3000);
+// console.log("process.env.port=" + process.env.port);
+// console.log("process.env.development=" + process.env.development);
+// let port = Number(process.env.PORT ? process.env.PORT : 3000);
 
 const mongoose = require("mongoose");
-const connectionString = require("../../configs/db_config").connectionString;
-
-const app = "http://localhost:" + port + "/tree/";
+const app = require("../../../configs/app_config.js").appPath + "tree/";
+const connectionString =
+  require("../../../configs/db_config.js").connectionString;
 console.log("server name =" + app);
 
 before((done) => {
@@ -19,9 +19,14 @@ before((done) => {
     let trace = 1;
     log("w", "Before started:" + new Date().toLocaleString());
     // створюємо підключення до бази
-    let connection = await mongoose
-      .createConnection(connectionString)
-      .asPromise();
+    let connection;
+    try {
+      connection = await mongoose
+        .createConnection(connectionString)
+        .asPromise();
+    } catch (error) {
+      log("e", "Connect to collection failed: " + error.message);
+    }
     trace
       ? log(
           "i",
@@ -35,6 +40,7 @@ before((done) => {
     } catch (error) {
       log("e", "Drop collection failed: " + error.message);
     }
+    // створюємо основну структуру дерева
 
     // закриваємо підключення до бази
     await connection.close();
@@ -43,8 +49,9 @@ before((done) => {
   }, 1000);
 });
 
-require("./tests/addFolder.js")(app);
-require("./tests/deleteFolder.js")(app);
+require("./addFolder.js")(app);
+require("./getTree.js")(app);
+//require("./tests/deleteFolder.js")(app);
 
 after((done) => {
   log("w", "End tests");

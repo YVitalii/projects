@@ -1,8 +1,4 @@
 /*
-set PORT=3033 
-set DEVELOPMENT=1 
-nodemon --exec "mocha -c" -w "./" -w "./db/tree/*" 
-supervisor --no-restart-on exit -i ./db/tree/test --program ./bin/www
 
 */
 
@@ -15,8 +11,6 @@ let app;
 // // ------------ логгер  --------------------
 const log = require("../../../tools/log.js"); // логер
 let logName = "<" + __filename.replace(__dirname, "").slice(1) + ">:";
-
-//log("w", logName, " ---------> Test started:  " + new Date().toLocaleString());
 
 const d = describe("POST:/folder/add", () => {
   //this.timeout(3000);
@@ -52,6 +46,22 @@ const d = describe("POST:/folder/add", () => {
         id = res.body.data._id;
         //console.log("---res.body.data._id----");
         //console.dir(id);
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.a("object");
+        done();
+      });
+  });
+  //--------------- Створення проекту СШАМ-7.12/7 -----------------------
+  it("Створення проекту 'СШАМ-7.12/7'", (done) => {
+    let folder = {
+      title: "СШАМ-7.12/7",
+      description: "Алюпол",
+    };
+    chai
+      .request(this.app)
+      .post(path)
+      .query(folder)
+      .end(function (err, res) {
         expect(res).to.have.status(200);
         expect(res.body).to.be.a("object");
         done();

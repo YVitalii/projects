@@ -18,7 +18,7 @@ let gTrace = 0;
 async function deleteFolder(req, res) {
   // ----------- настройки логгера локальные --------------
   let logN = logName + "";
-  let trace = 1;
+  let trace = 0;
   trace = gTrace != 0 ? gTrace : trace;
   trace ? log("i", logN, "Started") : null;
   trace ? log("i", logN, "--- req.query ---") : null;

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Tree = require("./treeModel.js");
 const folder_add = require("./folder_add.js");
 const folder_delete = require("./folder_delete.js");
+const getTree = require("./getTree.js");
 const maxItemsQty = require("../../configs/db_config.js").maxGetItemsPerTime;
 var express = require("express");
 var router = express.Router();
@@ -21,7 +22,7 @@ let gTrace = 0; //=1 глобальная трассировка (трассир
 
 router.post("/folder/add", folder_add);
 router.post("/folder/delete", folder_delete);
-
+router.get("/getTree", getTree);
 /**
  * GET items/getByName маршрут для поиска материалов по частичному совпадению имени
  * возвращает обьект {err,data}, где err - обьект ошибки, а data = Array []
