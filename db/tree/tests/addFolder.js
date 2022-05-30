@@ -4,8 +4,9 @@
 
 let chaiHttp = require("chai-http");
 let chai = require("chai");
-let expect = chai.expect;
 chai.use(chaiHttp);
+
+let expect = chai.expect;
 let app;
 
 // // ------------ логгер  --------------------

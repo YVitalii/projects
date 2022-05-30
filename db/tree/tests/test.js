@@ -11,7 +11,8 @@ const mongoose = require("mongoose");
 const app = require("../../../configs/app_config.js").appPath + "tree/";
 const connectionString =
   require("../../../configs/db_config.js").connectionString;
-console.log("server name =" + app);
+//console.log("server name =" + app);
+//const createCore = require("../createCore.js")(app);
 
 before((done) => {
   // очікуємо перезапуску сервера
@@ -40,11 +41,12 @@ before((done) => {
     } catch (error) {
       log("e", "Drop collection failed: " + error.message);
     }
-    // створюємо основну структуру дерева
 
     // закриваємо підключення до бази
     await connection.close();
     trace ? log("i", "DB: Connection to base was closed") : null;
+    // створюємо основну структуру дерева
+    await createCore();
     done();
   }, 1000);
 });

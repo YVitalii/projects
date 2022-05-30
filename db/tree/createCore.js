@@ -1,22 +1,21 @@
 /**
  * Модуль створює базову структуру папок проектів:
- * - Замовлення
- *      - Промислові
- *      - Лабораторні
- *      - Водообробка
- *      - Комплектуючі
- * - Модернізація
- *
- *
+ * структура описана в змінній core
  */
 
-const mongoose = require("mongoose");
-const Tree = require("./treeModel.js");
+//const mongoose = require("mongoose");
+//const Tree = require("./treeModel.js");
 // ------------ логгер  --------------------
 const log = require("../../tools/log.js"); // логер
 //const res = require("express/lib/response");
 const logName = "<" + __filename.replace(__dirname, "").slice(1) + ">:";
 let gTrace = 0;
+// ----------- chai --------------------
+let chaiHttp = require("chai-http");
+let chai = require("chai");
+chai.use(chaiHttp);
+// --------------------------------
+const app = require("../../configs/app_config.js").appPath + "/folder/add";
 
 let core = [
   {
@@ -61,11 +60,17 @@ let core = [
     ],
   },
 ];
+
 async function makeOne(one) {
   let trace = 1;
   trace ? log("i", logName, "Create " + one.title) : null;
-
-  resolve(one);
+  await chai
+    .request(this.app)
+    .post("/folder/add")
+    .end(function (err, res) {
+      if (err) reject(err);
+      resolve(res.data);
+    });
 }
 
 async function makeMany(parent, arr) {
@@ -77,16 +82,19 @@ async function makeMany(parent, arr) {
   }
 }
 
-async function createCore(connection) {
+async function createCore() {
   log(
     "i",
     logName,
     " ----------- Створення базової структури проектів ----------"
   );
   console.dir(core, { depth: 3 });
-  await makeMany(core);
+  log("i", "this.app=", this.app);
+  await makeMany(null, core);
 }
 
-if (!module.parent) {
-  createCore();
-}
+module.exports = (app) => {
+  this.app = app;
+  log("w", "Create core: this.app=", this.app);
+  return createCore;
+};
